@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+docker run \
+  --rm \
+  --tty \
+  --interactive \
+  --privileged \
+  --volume "$(pwd):$(pwd)" \
+  --workdir "$(pwd)" \
+  --expose 5900-5999 \
+  --publish 6080 \
+  --env USER_NAME="$(id -un)" \
+  --env USER_UID="$(id -u)" \
+  --env USER_GID="$(id -g)" \
+  uroesch/packer:latest \
+  "${@}"
