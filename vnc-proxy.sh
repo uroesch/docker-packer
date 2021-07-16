@@ -37,8 +37,11 @@ function wait_for_vnc() {
 
 function start_novnc_proxy() {
   local vnc_address=$(wait_for_vnc)
-  novnc_proxy --listen ${NOVNC_PORT} --vnc ${vnc_address} | \
+  ( novnc_proxy --listen ${NOVNC_PORT} --vnc ${vnc_address} | \
     sed -n -e "/${SHORTNAME}/ { s/${SHORTNAME}/localhost/g; p }"
+  ) &
+  while [[ -n $(find_vnc_port) ]]; do sleep 10; done
+  pkill -f novnc_proxy
 }
 
 function restart() {
@@ -50,4 +53,3 @@ function restart() {
 # Main
 # -----------------------------------------------------------------------------
 start_novnc_proxy
-
