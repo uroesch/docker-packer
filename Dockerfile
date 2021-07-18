@@ -1,6 +1,7 @@
 FROM ubuntu:21.04
 MAINTAINER Urs Roesch <github@bun.ch>
 
+
 ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -48,6 +49,5 @@ COPY vnc-proxy.sh /vnc-proxy.sh
 RUN chmod u+x /vnc-proxy.sh
 
 EXPOSE 5900-5999
-EXPOSE 6080
 
 ENTRYPOINT ["/entrypoint.sh"]

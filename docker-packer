@@ -12,7 +12,11 @@ set -o pipefail
 # -----------------------------------------------------------------------------
 declare -g TTY=
 declare -g INTERACTIVE=
-declare -g NOVNC_PORT=6180
+declare -i NOVNC_PREFIX=111
+declare -i NOVNC_PORT=${NOVNC_PREFIX}80
+declare -i TRIES=10
+declare -i SLEEP=15
+declare -i ABORT_AFTER=$(( $(date +%s) + 60 * 5 ))
 
 # -----------------------------------------------------------------------------
 # Functions
@@ -23,22 +27,46 @@ function has_tty() {
   INTERACTIVE=true
 }
 
+function check_instance() {
+  docker ps
+}
+
+function find_novnc_port() {
+  while true; do
+    [[ -z $(ss -Hlnt "sport = ${NOVNC_PORT}") ]] && return 0
+    NOVNC_PORT+=1
+  done
+}
+
+function run_docker() {
+  find_novnc_port
+  docker run \
+    --rm \
+    ${TTY:+--tty} \
+    ${INTERACTIVE:+--interactive} \
+    --env "NOVNC_PORT=${NOVNC_PORT}" \
+    --privileged \
+    --volume "$(pwd):$(pwd)" \
+    --workdir "$(pwd)" \
+    --expose 5900-5999 \
+    --publish ${NOVNC_PORT}:${NOVNC_PORT} \
+    --env USER_NAME="$(id -un)" \
+    --env USER_UID="$(id -u)" \
+    --env USER_GID="$(id -g)" \
+    uroesch/packer:latest \
+    "${@}"
+}
+
 
 # -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------
 has_tty
-docker run \
-  --rm \
-  ${TTY:+--tty} \
-  ${INTERACTIVE:+--interactive} \
-  --privileged \
-  --volume "$(pwd):$(pwd)" \
-  --workdir "$(pwd)" \
-  --expose 5900-5999 \
-  --publish ${NOVNC_PORT}:${NOVNC_PORT} \
-  --env USER_NAME="$(id -un)" \
-  --env USER_UID="$(id -u)" \
-  --env USER_GID="$(id -g)" \
-  uroesch/packer:latest \
-  "${@}"
+# try a few times and abort after a few times
+# or after time threshold
+while (( ${TRIES} > 0 )); do
+  run_docker "${@}" && exit 0 || :
+  (( TRIES-- ))
+  (( $(date +%s) > ${ABORT_AFTER} )) && exit 123
+  sleep ${SLEEP}
+done

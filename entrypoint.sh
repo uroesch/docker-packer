@@ -48,7 +48,7 @@ function create_homedir() {
   # Create the user's home if it doesn't exist
   [[ ! -d ${USER_HOME} ]] && mkdir -p "${USER_HOME}"
 
-  # Take ownership of user's home directory if owned by root or 
+  # Take ownership of user's home directory if owned by root or
   # if FORCED_OWNERSHIP is enabled
   OWNER_IDS="$(stat -c "%u:%g" "${USER_HOME}")"
   if [[ ${OWNER_IDS} != ${USER_UID}:${USER_GID} ]]; then

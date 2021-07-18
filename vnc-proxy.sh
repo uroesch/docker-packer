@@ -13,7 +13,7 @@ trap restart EXIT
 # Globals
 # -----------------------------------------------------------------------------
 declare -r SHORTNAME=$(hostname -s)
-declare -r NOVNC_PORT=6080
+declare -r NOVNC_PORT=${NOVNC_PORT:-6080}
 declare -r PACKER_VNC_START=5900
 declare -r PACKER_VNC_END=6000
 
@@ -35,21 +35,23 @@ function wait_for_vnc() {
   echo ${vnc_address}
 }
 
-function start_novnc_proxy() {
+function run_proxy() {
   local vnc_address=$(wait_for_vnc)
+  local pid=''
   ( novnc_proxy --listen ${NOVNC_PORT} --vnc ${vnc_address} | \
     sed -n -e "/${SHORTNAME}/ { s/${SHORTNAME}/localhost/g; p }"
   ) &
+  pid=$!
   while [[ -n $(find_vnc_port) ]]; do sleep 10; done
-  pkill -f novnc_proxy
+  [[ -n ${pid} ]] && kill ${pid}
 }
 
 function restart() {
   sleep 10
-  start_novnc_proxy
+  run_proxy
 }
 
 # -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------
-start_novnc_proxy
+run_proxy
