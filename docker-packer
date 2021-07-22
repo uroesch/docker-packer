@@ -7,9 +7,14 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+trap cleanup EXIT
+
 # -----------------------------------------------------------------------------
 # Globals
 # -----------------------------------------------------------------------------
+declare -r DOCKER_IMAGE=uroesch/packer:latest
+declare -g BUILD_DIR=${BUILD_DIR:-$(pwd)}
+declare -g TMP_DIR="${BUILD_DIR}/tmp/${RANDOM}-${RANDOM}"
 declare -g TTY=
 declare -g INTERACTIVE=
 declare -i NOVNC_PREFIX=111
@@ -25,6 +30,10 @@ function has_tty() {
   [[ ! -t 1 ]] && return 0
   TTY=true
   INTERACTIVE=true
+}
+
+function create_build_environment() {
+  [[ -d ${TMP_DIR} ]] || mkdir -p "${TMP_DIR}"
 }
 
 function check_instance() {
@@ -44,24 +53,31 @@ function run_docker() {
     --rm \
     ${TTY:+--tty} \
     ${INTERACTIVE:+--interactive} \
-    --env "NOVNC_PORT=${NOVNC_PORT}" \
     --privileged \
     --volume "$(pwd):$(pwd)" \
+    --volume "${BUILD_DIR}/iso:$(pwd)/iso" \
+    --volume "${BUILD_DIR}/images:$(pwd)/images" \
+    --volume "${TMP_DIR}:$(pwd)/artifacts" \
     --workdir "$(pwd)" \
     --expose 5900-5999 \
     --publish ${NOVNC_PORT}:${NOVNC_PORT} \
+    --env NOVNC_PORT="${NOVNC_PORT}" \
     --env USER_NAME="$(id -un)" \
     --env USER_UID="$(id -u)" \
     --env USER_GID="$(id -g)" \
-    uroesch/packer:latest \
+    ${DOCKER_IMAGE} \
     "${@}"
 }
 
+function cleanup {
+  [[ -d ${TMP_DIR} ]] && rm -rf ${TMP_DIR}
+}
 
 # -----------------------------------------------------------------------------
 # Main
 # -----------------------------------------------------------------------------
 has_tty
+create_build_environment
 # try a few times and abort after a few times
 # or after time threshold
 while (( ${TRIES} > 0 )); do
