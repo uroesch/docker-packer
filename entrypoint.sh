@@ -1,23 +1,22 @@
 #!/usr/bin/env bash
 
-# -----------------------------------------------------------------------------
-# Environment Variables
-# -----------------------------------------------------------------------------
-export DISPLAY=:7777
-export WINEDLLOVERRIDES="mscoree,mshtml="
+set -o errexit
+set -o nounset
+set -o pipefail
 
 # -----------------------------------------------------------------------------
 # Globals
 # -----------------------------------------------------------------------------
 # Set user account and run values
-USER_NAME=${USER_NAME:-wineuser}
-USER_UID=${USER_UID:-1010}
-USER_GID=${USER_GID:-"${USER_UID}"}
-USER_HOME=${USER_HOME:-/home/"${USER_NAME}"}
-USER_PASSWD=${USER_PASSWD:-"$(openssl passwd -1 -salt "$(openssl rand -base64 6)" "${USER_NAME}")"}
-RUN_AS_ROOT=${RUN_AS_ROOT:-no}
-FORCED_OWNERSHIP=${FORCED_OWNERSHIP:-no}
-TZ=${TZ:-UTC}
+declare -g USER_NAME=${USER_NAME:-packer}
+declare -g USER_UID=${USER_UID:-1010}
+declare -g USER_GID=${USER_GID:-"${USER_UID}"}
+declare -g USER_HOME=${USER_HOME:-/home/"${USER_NAME}"}
+declare -r DEFAULT_PASSWD="$(openssl passwd -1 -salt "$(openssl rand -base64 6)" "${USER_NAME}")"}
+declare -g USER_PASSWD=${USER_PASSWD:-${DEFAULT_PASSWD}}
+declare -g RUN_AS_ROOT=${RUN_AS_ROOT:-no}
+declare -g FORCED_OWNERSHIP=${FORCED_OWNERSHIP:-no}
+declare -g TZ=${TZ:-UTC}
 
 # -----------------------------------------------------------------------------
 # Functions
