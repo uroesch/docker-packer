@@ -19,6 +19,7 @@ RUN apt-get update \
        gpg \
        iproute2 \
        jq \
+       p7zip-full \
        qemu-kvm \
        rake \
        software-properties-common \
