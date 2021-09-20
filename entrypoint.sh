@@ -16,11 +16,17 @@ declare -r DEFAULT_PASSWD="$(openssl passwd -1 -salt "$(openssl rand -base64 6)"
 declare -g USER_PASSWD=${USER_PASSWD:-${DEFAULT_PASSWD}}
 declare -g RUN_AS_ROOT=${RUN_AS_ROOT:-no}
 declare -g FORCED_OWNERSHIP=${FORCED_OWNERSHIP:-no}
+declare -g DEBUG=${DEBUG:-}
 declare -g TZ=${TZ:-UTC}
 
 # -----------------------------------------------------------------------------
 # Functions
 # -----------------------------------------------------------------------------
+
+function init() {
+  [[ -n ${DEBUG} ]] && set -o xtrace
+}
+
 function is_enabled() {
   [[ ${1} =~ ^(yes|on|true|1)$ ]]
 }
@@ -91,9 +97,12 @@ function start_vnc_proxy() {
 # -----------------------------------------------------------------------------
 # main
 # -----------------------------------------------------------------------------
+init
 create_user
 create_homedir
 configure_timezone
 configure_kvm
 start_vnc_proxy
 run_command "${@}"
+
+# vim: set shiftwidth=2 softtabstop=2 expandtab :
