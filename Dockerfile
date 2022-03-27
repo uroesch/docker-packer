@@ -1,4 +1,4 @@
-FROM ubuntu:21.04
+FROM ubuntu:21.10
 MAINTAINER Urs Roesch <github@bun.ch>
 
 
@@ -24,7 +24,10 @@ RUN apt-get update \
        rake \
        software-properties-common \
        websockify \
-       xorriso
+       xorriso \
+    && apt-get -y autoremove \
+    && apt-get -y autoclean \
+    && find /var/cache/apt/archives -type f -delete
 
 # install latest packer from hashicorp
 RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - \
@@ -32,7 +35,8 @@ RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - \
     && apt-get update \
     && apt-get -y install packer \
     && apt-get -y autoremove \
-    && apt-get -y autoclean
+    && apt-get -y autoclean \
+    && find /var/cache/apt/archives -type f -delete
 
 # install novnc from git
 RUN cd /usr/local && \
