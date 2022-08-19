@@ -2,7 +2,13 @@
 
 DOCKER_USER    := uroesch
 DOCKER_TAG     := packer
-DOCKER_VERSION := latest
+DOCKER_VERSION := $(shell sed '/#VERSION/!d; s/.* //' Dockerfile)
+
+
+push-as-latest: push
+	docker tag $(DOCKER_USER)/$(DOCKER_TAG):$(DOCKER_VERSION) \
+		$(DOCKER_USER)/$(DOCKER_TAG):latest
+	docker push $(DOCKER_USER)/$(DOCKER_TAG):latest
 
 push: build
 	docker push $(DOCKER_USER)/$(DOCKER_TAG):$(DOCKER_VERSION)

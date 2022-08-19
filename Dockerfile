@@ -1,7 +1,7 @@
-FROM ubuntu:21.10
+FROM ubuntu:22.04
 MAINTAINER Urs Roesch <github@bun.ch>
 
-
+#VERSION 1.2.0
 ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -44,6 +44,14 @@ RUN cd /usr/local && \
     chmod 755 novnc/utils/novnc_proxy && \
     cd /usr/local/bin && \
     ln -s ../novnc/utils/novnc_proxy
+
+# Add RSA keys to ssh_config
+# See: https://askubuntu.com/questions/1409105
+RUN sed -i \
+    -e '/Host \*/a\    PubkeyAcceptedKeyTypes +ssh-rsa' \
+    -e '/Host \*/a\    HostkeyAlgorithms +ssh-rsa' \
+    /etc/ssh/ssh_config
+
 
 # copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
