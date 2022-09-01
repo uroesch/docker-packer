@@ -13,8 +13,7 @@ push-as-latest: push
 push-only:
 	docker push $(DOCKER_USER)/$(DOCKER_TAG):$(DOCKER_VERSION)
 
-push: build
-	docker push $(DOCKER_USER)/$(DOCKER_TAG):$(DOCKER_VERSION)
+push: build push-only
 
 build:
 	docker build \
