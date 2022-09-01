@@ -10,6 +10,9 @@ push-as-latest: push
 		$(DOCKER_USER)/$(DOCKER_TAG):latest
 	docker push $(DOCKER_USER)/$(DOCKER_TAG):latest
 
+push-only:
+	docker push $(DOCKER_USER)/$(DOCKER_TAG):$(DOCKER_VERSION)
+
 push: build
 	docker push $(DOCKER_USER)/$(DOCKER_TAG):$(DOCKER_VERSION)
 

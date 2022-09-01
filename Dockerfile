@@ -1,9 +1,10 @@
 FROM ubuntu:22.04
 MAINTAINER Urs Roesch <github@bun.ch>
 
-#VERSION 1.2.1
+#VERSION 1.2.2
 ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
+ENV CODENAME jammy
 
 # install base tools for docker build
 RUN apt-get update \
@@ -31,7 +32,7 @@ RUN apt-get update \
 
 # install latest packer from hashicorp
 RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - \
-    && apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com hirsute main" \
+    && apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com ${CODENAME} main" \
     && apt-get update \
     && apt-get -y install packer \
     && apt-get -y autoremove \
@@ -51,7 +52,6 @@ RUN sed -i \
     -e '/Host \*/a\    PubkeyAcceptedKeyTypes +ssh-rsa' \
     -e '/Host \*/a\    HostkeyAlgorithms +ssh-rsa' \
     /etc/ssh/ssh_config
-
 
 # copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
