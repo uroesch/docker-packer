@@ -1,0 +1,50 @@
+= Docker Image for Packer builds with QEMU
+:author: Urs Roesch
+:!toc:
+:icons: font
+:git-user: uroesch
+:repo-name: docker-packer
+ifdef::env-gitlab[]
+:base-url:   https://gitlab.com/{git-user}/{repo-name}
+:email:      gitlab@bun.ch
+endif::env-gitlab[]
+ifdef::env-github[]
+:base-url:          https://github.com/{git-user}/{repo-name}
+:email:             github@bun.ch
+:tip-caption:       :bulb:
+:note-caption:      :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption:   :fire:
+:warning-caption:   :warning:
+endif::env-github[]
+
+ifndef::env-github,env-gitlab[]
+image:icons/gitlab-avatar.png[float="left"]
+endif::env-github,env-gitlab[]
+
+ifdef::env-github,env-gitlab[]
++++
+<img src="icons/gitlab-avatar.png" align="left">
++++
+endif::env-github,env-gitlab[]
+
+Docker container for building packer images with QEMU and Ansible.
+
+
+== Installed Tools
+
+* rake (ruby)
+* ansible (python3)
+* packer
+* kvm (qemu)
+* noVNC
+
+== Usage
+
+Change into your packer project directory and run the script
+`docker-packer` follwed by the `packer` command. E.g.
+
+[source,console]
+----
+docker-packer packer build -parallel-builds=1 ubuntu.pkr.hcl
+----

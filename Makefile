@@ -36,6 +36,10 @@ clean:
 	IMAGES="$(shell docker images -qf dangling=true)"; \
 	if [ -n "$${IMAGES}" ]; then docker rmi $${IMAGES}; fi
 
-all: build clean
+all: build clean doc
+
+doc:
+	asciidoctor -b docbook -a leveloffset=+1 -o - README.adoc | \
+		pandoc --atx-headers --wrap=preserve -t gfm -f docbook - > README.md
 
 .PHONY: all
