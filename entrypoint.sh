@@ -8,6 +8,10 @@ set -o pipefail
 # Globals
 # -----------------------------------------------------------------------------
 # Set user account and run values
+declare -r SCRIPT=${0##*/}
+declare -r AUTHOR="Urs Roesch"
+declare -r VERSION=0.5.0
+declare -r LICENSE=MIT
 declare -g USER_NAME=${USER_NAME:-packer}
 declare -g USER_UID=${USER_UID:-1010}
 declare -g USER_GID=${USER_GID:-"${USER_UID}"}

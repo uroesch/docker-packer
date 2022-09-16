@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 MAINTAINER Urs Roesch <github@bun.ch>
 
-#VERSION 1.2.3
+#VERSION 1.2.4
 ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CODENAME jammy
@@ -55,6 +55,7 @@ RUN sed -i \
 
 # copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
+COPY LICENSE /LICENSE
 RUN chmod u+x /entrypoint.sh
 
 # copy the novnc start script
