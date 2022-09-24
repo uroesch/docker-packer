@@ -4,6 +4,10 @@ DOCKER_USER    := uroesch
 DOCKER_TAG     := packer
 DOCKER_VERSION := $(shell sed '/#VERSION/!d; s/.* //' Dockerfile)
 
+.PHONY: all
+
+all: build clean doc
+
 push-as-latest: push
 	docker tag $(DOCKER_USER)/$(DOCKER_TAG):$(DOCKER_VERSION) \
 		$(DOCKER_USER)/$(DOCKER_TAG):latest
@@ -35,10 +39,8 @@ clean:
 	IMAGES="$(shell docker images -qf dangling=true)"; \
 	if [ -n "$${IMAGES}" ]; then docker rmi $${IMAGES}; fi
 
-all: build clean doc
 
 doc:
 	asciidoctor -b docbook -a leveloffset=+1 -o - README.adoc | \
 		pandoc --atx-headers --wrap=preserve -t gfm -f docbook - > README.md
 
-.PHONY: all
