@@ -2,7 +2,7 @@
 
 DOCKER_USER    := uroesch
 DOCKER_TAG     := packer
-DOCKER_VERSION := $(shell sed '/#VERSION/!d; s/.* //' Dockerfile)
+DOCKER_VERSION := $(shell sed '/^.VERSION/!d; s/.* //' Dockerfile)
 
 .PHONY: all
 
