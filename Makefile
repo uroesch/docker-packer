@@ -4,19 +4,24 @@ DOCKER_USER    := uroesch
 DOCKER_TAG     := packer
 DOCKER_VERSION := $(shell sed '/^.VERSION/!d; s/.* //' Dockerfile)
 
-.PHONY: all
+.PHONY: all list to-latest
 
 all: build clean doc
 
-push-as-latest: push
+to-latest:
 	docker tag $(DOCKER_USER)/$(DOCKER_TAG):$(DOCKER_VERSION) \
 		$(DOCKER_USER)/$(DOCKER_TAG):latest
+
+push-as-latest: to-latest push
 	docker push $(DOCKER_USER)/$(DOCKER_TAG):latest
 
 push-only:
 	docker push $(DOCKER_USER)/$(DOCKER_TAG):$(DOCKER_VERSION)
 
 push: build push-only
+
+list:
+	docker images | grep packer
 
 build:
 	docker build \

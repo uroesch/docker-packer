@@ -1,7 +1,7 @@
-FROM ubuntu:22.10
+FROM ubuntu:22.04
 MAINTAINER Urs Roesch <github@bun.ch>
 
-#VERSION 1.3.1
+#VERSION 1.2.6
 ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CODENAME jammy
@@ -20,9 +20,11 @@ RUN apt-get update \
        gpg \
        iproute2 \
        jq \
+       lshw \
        p7zip-full \
        qemu-kvm \
        rake \
+       sshpass \
        software-properties-common \
        websockify \
        xorriso \
