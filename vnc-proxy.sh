@@ -14,12 +14,13 @@ trap restart EXIT
 # -----------------------------------------------------------------------------
 declare -r SCRIPT_PATH=$(cd $(dirname ${BASH_ARGV0}); pwd)
 declare -r SCRIPT=${BASH_ARGV0##*/}
-declare -r VERSION=0.5.0
+declare -r VERSION=0.7.0
 declare -r AUTHOR="Urs Roesch"
 declare -r LICENSE=MIT
 declare -r SHORTNAME=$(hostname -s)
 declare -i NOVNC_PORT=${NOVNC_PORT:-6080}
 declare -g NOVNC_DEBUG=${NOVNC_DEBUG:-false}
+declare -g NOVNC_WEBROOT=
 declare -g NOVNC_LOOP=true
 declare -r NOVNC_TIMEOUT=10
 declare -r PACKER_VNC_START=5900
@@ -38,6 +39,8 @@ function usage() {
   Options:
     -h | --help         This message
     -d | --debug        Run in debug mode e.g. shell tracing.
+    -S | --service      Run as a service.
+    -w | --web-root     Path to the novnc webroot file on disk.
     -p | --port <port>  Specify the port to listen on
                         Default: ${NOVNC_PORT}
     -V | --version      Display version and exit
@@ -55,10 +58,12 @@ USAGE
 function parse_options() {
   while (( ${#} > 0 )); do
     case "${1}" in
-    -d|--debug)   NOVNC_DEBUG=true;;
-    -p|--port)    shift; NOVNC_PORT=${1};;
-    -V|--version) version;;
-    -h|--help)    usage 0;;
+    -d|--debug)    NOVNC_DEBUG=true;;
+    -p|--port)     shift; NOVNC_PORT=${1};;
+    -S|--service)  NOVNC_LOOP=false;;
+    -V|--version)  version;;
+    -w|--web-root) shift; NOVNC_WEBROOT=${1};;
+    -h|--help)     usage 0;;
     esac
     shift
   done
@@ -106,7 +111,8 @@ function check_status() {
 function start_proxy() {
   novnc_proxy \
     --listen ${NOVNC_PORT} \
-    --vnc ${vnc_address} | \
+    --vnc ${vnc_address} \
+    ${NOVNC_WEBROOT:+--web ${NOVNC_WEBROOT}} | \
     sed -n -e "/${SHORTNAME}/ { s/${SHORTNAME}/localhost/g; p }"
 }
 
@@ -124,6 +130,10 @@ function restart() {
   sleep ${NOVNC_TIMEOUT}
   export NOVNC_PORT NOVNC_DEBUG
   exec ${SCRIPT_PATH}/${SCRIPT}
+}
+
+function stop() {
+  NOVNC_LOOP=true && exit 0
 }
 
 # -----------------------------------------------------------------------------
