@@ -14,7 +14,7 @@ trap cleanup EXIT
 # -----------------------------------------------------------------------------
 declare -r SCRIPT=${0##*/}
 declare -r AUTHOR="Urs Roesch"
-declare -r VERSION=0.4.0
+declare -r VERSION=0.5.0
 declare -r LICENSE=MIT
 declare -r DOCKER_IMAGE=uroesch/packer:latest
 declare -g BUILD_DIR=${BUILD_DIR:-$(pwd)}
@@ -73,6 +73,16 @@ function has_tty() {
   INTERACTIVE=true
 }
 
+function certs_dir() {
+  # find the certs directory and mount it on the container
+  for dir in /etc/{ssl/certs,pki/tls/certs}; do
+    if [[ -d ${dir} ]]; then
+      echo ${dir}
+      return 0
+    fi
+  done
+}
+
 function create_build_environment() {
   [[ -d ${TMP_DIR} ]] || mkdir -p "${TMP_DIR}"
 }
@@ -99,6 +109,7 @@ function run_docker() {
     --volume "${BUILD_DIR}/iso:$(pwd)/iso" \
     --volume "${BUILD_DIR}/images:$(pwd)/images" \
     --volume "${TMP_DIR}:$(pwd)/artifacts" \
+    --volume "$(certs_dir):/etc/ssl/certs" \
     --workdir "$(pwd)" \
     --expose 5900-5999 \
     --publish ${NOVNC_PORT}:${NOVNC_PORT} \
