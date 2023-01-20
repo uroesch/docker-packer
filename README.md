@@ -27,11 +27,15 @@ E.g when running in a CD/CI pipeline.
 
 ``` console
   Usage:
-    docker-packer [-h|-V] | command
+    docker-packer [<options>] | command
 
   Options:
-    -h | --help         This message
-    -V | --version      Display version and exit
+    -h | --help                    This message
+    -b | --build-dir <path>        Mount the build root from given path.
+    -i | --images-dir <path>       Mount the images directory from given path.
+    -I | --iso-dir <path>          Mount the iso directory from given path.
+    -p | --provisioners-dir <path> Mount the provisioniers from given path.
+    -V | --version                 Display version and exit.
 
   Descriptions:
     Wrapper script for use with docker.io/uroesch/packer container.
@@ -48,3 +52,19 @@ Change into your packer project directory and run the script
 ``` console
 docker-packer packer build -parallel-builds=1 ubuntu.pkr.hcl
 ```
+
+When the ISO files and the images are located on a separate disk or mount point
+directory the docker packer can be given options to mount from somewhere else.
+
+``` console
+docker-packer \
+  --iso-dir /external-disk/iso-files --images-dir /nfs-share/images -- \
+  packer build -parallel-builds=1 ubuntu.pkr.hcl
+```
+
+<div class="note">
+
+The `docker-packer` wrapper script is tailored to the build frame work found
+under {user-url}/packer-linux
+
+</div>

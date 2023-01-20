@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 MAINTAINER Urs Roesch <github@bun.ch>
 
-#VERSION 1.2.9
+#VERSION 1.2.10
 ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CODENAME jammy
@@ -60,7 +60,8 @@ COPY entrypoint.sh /entrypoint.sh
 COPY LICENSE /LICENSE
 RUN chmod u+x /entrypoint.sh
 
-# copy the novnc start script
+# copy the docker-packer and novnc start script
+COPY docker-packer /docker-packer
 COPY vnc-proxy.sh /vnc-proxy.sh
 RUN chmod u+x /vnc-proxy.sh
 

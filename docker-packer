@@ -14,10 +14,13 @@ trap cleanup EXIT
 # -----------------------------------------------------------------------------
 declare -r SCRIPT=${0##*/}
 declare -r AUTHOR="Urs Roesch"
-declare -r VERSION=0.5.0
+declare -r VERSION=0.6.0
 declare -r LICENSE=MIT
 declare -r DOCKER_IMAGE=uroesch/packer:latest
 declare -g BUILD_DIR=${BUILD_DIR:-$(pwd)}
+declare -g ISO_DIR=${BUILD_DIR}/iso
+declare -g IMAGES_DIR=${BUILD_DIR}/images
+declare -g PROVISIONERS_DIR=${BUILD_DIR}/provisioners
 declare -g TMP_DIR="${BUILD_DIR}/tmp/${RANDOM}-${RANDOM}"
 declare -g TTY=
 declare -g INTERACTIVE=
@@ -26,6 +29,7 @@ declare -i NOVNC_PORT=${NOVNC_PREFIX}80
 declare -i TRIES=10
 declare -i SLEEP=15
 declare -i ABORT_AFTER=$(( $(date +%s) + 60 * 5 ))
+declare -a CMD_LINE=()
 
 # -----------------------------------------------------------------------------
 # Functions
@@ -35,11 +39,15 @@ function usage() {
   cat <<USAGE
 
   Usage:
-    ${SCRIPT} [-h|-V] | command
+    ${SCRIPT} [<options>] | command
 
   Options:
-    -h | --help         This message
-    -V | --version      Display version and exit
+    -h | --help                    This message
+    -b | --build-dir <path>        Mount the build root from given path.
+    -i | --images-dir <path>       Mount the images directory from given path.
+    -I | --iso-dir <path>          Mount the iso directory from given path.
+    -p | --provisioners-dir <path> Mount the provisioniers from given path.
+    -V | --version                 Display version and exit.
 
   Descriptions:
     Wrapper script for use with docker.io/uroesch/packer container.
@@ -54,8 +62,14 @@ USAGE
 function parse_options() {
   while (( ${#} > 0 )); do
     case "${1}" in
-    -V|--version) version;;
-    -h|--help)    usage 0;;
+    -b|--build-dir)         shift; BUILD_DIR="${1}";;
+    -h|--help)              usage 0;;
+    -i|--iso-dir)           shift; ISO_DIR="${1}";;
+    -i|--images-dir)        shift; IMAGES_DIR="${1}";;
+    -p|--provisioners-dir)  shift; PROVISIONERS_DIR="${1}";;
+    -V|--version)           version;;
+    --)                     : ;;
+    *)                      CMD_LINE+=( "${1}" );;
     esac
     shift
   done
@@ -105,12 +119,13 @@ function run_docker() {
     ${TTY:+--tty} \
     ${INTERACTIVE:+--interactive} \
     --privileged \
-    --volume "$(pwd):$(pwd)" \
-    --volume "${BUILD_DIR}/iso:$(pwd)/iso" \
-    --volume "${BUILD_DIR}/images:$(pwd)/images" \
-    --volume "${TMP_DIR}:$(pwd)/artifacts" \
+    --volume "${BUILD_DIR}:${BUILD_DIR}" \
+    --volume "${ISO_DIR}:${BUILD_DIR}/iso" \
+    --volume "${IMAGES_DIR}/images:${BUILD_DIR}/images" \
+    --volume "${PROVISIONERS_DIR}:${BUILD_DIR}/provisioners" \
+    --volume "${TMP_DIR}:${BUILD_DIR}/artifacts" \
     --volume "$(certs_dir):/etc/ssl/certs" \
-    --workdir "$(pwd)" \
+    --workdir "${BUILD_DIR}" \
     --expose 5900-5999 \
     --publish ${NOVNC_PORT}:${NOVNC_PORT} \
     --env NOVNC_PORT="${NOVNC_PORT}" \
@@ -134,7 +149,7 @@ create_build_environment
 # try a few times and abort after a few times
 # or after time threshold
 while (( ${TRIES} > 0 )); do
-  run_docker "${@}" && exit 0 || :
+  run_docker "${CMD_LINE[@]}" && exit 0 || :
   (( TRIES-- ))
   (( $(date +%s) > ${ABORT_AFTER} )) && exit 123
   sleep ${SLEEP}
