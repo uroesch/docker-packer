@@ -14,7 +14,7 @@ trap cleanup EXIT
 # -----------------------------------------------------------------------------
 declare -r SCRIPT=${0##*/}
 declare -r AUTHOR="Urs Roesch"
-declare -r VERSION=0.6.0
+declare -r VERSION=0.6.1
 declare -r LICENSE=MIT
 declare -r DOCKER_IMAGE=uroesch/packer:latest
 declare -g BUILD_DIR=${BUILD_DIR:-$(pwd)}
@@ -121,7 +121,7 @@ function run_docker() {
     --privileged \
     --volume "${BUILD_DIR}:${BUILD_DIR}" \
     --volume "${ISO_DIR}:${BUILD_DIR}/iso" \
-    --volume "${IMAGES_DIR}/images:${BUILD_DIR}/images" \
+    --volume "${IMAGES_DIR}:${BUILD_DIR}/images" \
     --volume "${PROVISIONERS_DIR}:${BUILD_DIR}/provisioners" \
     --volume "${TMP_DIR}:${BUILD_DIR}/artifacts" \
     --volume "$(certs_dir):/etc/ssl/certs" \

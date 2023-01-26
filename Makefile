@@ -44,8 +44,6 @@ clean:
 	IMAGES="$(shell docker images -qf dangling=true)"; \
 	if [ -n "$${IMAGES}" ]; then docker rmi $${IMAGES}; fi
 
-
 doc:
 	asciidoctor -b docbook -a leveloffset=+1 -o - README.adoc | \
 		pandoc --atx-headers --wrap=preserve -t gfm -f docbook - > README.md
-
