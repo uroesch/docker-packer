@@ -1,7 +1,7 @@
 FROM ubuntu:22.04
 MAINTAINER Urs Roesch <github@bun.ch>
 
-#VERSION 1.2.11
+#VERSION 1.2.12
 ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CODENAME jammy

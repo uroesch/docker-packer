@@ -14,7 +14,7 @@ trap cleanup EXIT
 # -----------------------------------------------------------------------------
 declare -r SCRIPT=${0##*/}
 declare -r AUTHOR="Urs Roesch"
-declare -r VERSION=0.6.1
+declare -r VERSION=0.7.0
 declare -r LICENSE=MIT
 declare -r DOCKER_IMAGE=uroesch/packer:latest
 declare -g BUILD_DIR=${BUILD_DIR:-$(pwd)}
@@ -101,8 +101,8 @@ function create_build_environment() {
   [[ -d ${TMP_DIR} ]] || mkdir -p "${TMP_DIR}"
 }
 
-function check_instance() {
-  docker ps
+function update_docker_container() {
+  docker pull ${DOCKER_IMAGE} || :
 }
 
 function find_novnc_port() {
@@ -113,6 +113,7 @@ function find_novnc_port() {
 }
 
 function run_docker() {
+  update_docker_container
   find_novnc_port
   docker run \
     --rm \
@@ -146,11 +147,4 @@ function cleanup {
 parse_options "${@}"
 has_tty
 create_build_environment
-# try a few times and abort after a few times
-# or after time threshold
-while (( ${TRIES} > 0 )); do
-  run_docker "${CMD_LINE[@]}" && exit 0 || :
-  (( TRIES-- ))
-  (( $(date +%s) > ${ABORT_AFTER} )) && exit 123
-  sleep ${SLEEP}
-done
+run_docker "${CMD_LINE[@]}"
