@@ -10,7 +10,7 @@ set -o pipefail
 # Set user account and run values
 declare -r SCRIPT=${0##*/}
 declare -r AUTHOR="Urs Roesch"
-declare -r VERSION=0.5.0
+declare -r VERSION=0.5.1
 declare -r LICENSE=MIT
 declare -g USER_NAME=${USER_NAME:-packer}
 declare -g USER_UID=${USER_UID:-1010}
@@ -33,10 +33,13 @@ function is_disabled() {
   [[ ${1} =~ ^(no|off|false|0)$ ]]
 }
 
+function create_group() {
+  getent group "${USER_GID}" &>/dev/null && return 0
+  groupadd --gid "${USER_GID}" "${USER_NAME}" 2>/dev/null
+}
+
 function create_user() {
-  # Create the user account
-  ! grep -q ":${USER_GID}:$" /etc/group && \
-  groupadd --gid "${USER_GID}" "${USER_NAME}"
+  getent passwd "${USER_NAME}" &>/dev/null && return 0
   useradd \
     --shell /bin/bash \
     --uid "${USER_UID}" \
@@ -69,12 +72,16 @@ function create_homedir() {
 }
 
 function configure_kvm() {
-  [[ -c /dev/kvm ]] && chgrp ${USER_GID} /dev/kvm
+  [[ -c /dev/kvm ]] && chgrp ${USER_GID} /dev/kvm || :
 }
 
 function configure_timezone() {
   ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime && \
     echo "${TZ}" > /etc/timezone
+}
+
+function start_vnc_proxy() {
+  [[ -f /vnc-proxy.sh ]] && /vnc-proxy.sh &
 }
 
 function run_command() {
@@ -88,13 +95,10 @@ function run_command() {
   fi
 }
 
-function start_vnc_proxy() {
-  [[ -f /vnc-proxy.sh ]] && /vnc-proxy.sh &
-}
-
 # -----------------------------------------------------------------------------
 # main
 # -----------------------------------------------------------------------------
+create_group
 create_user
 create_homedir
 configure_timezone
