@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
+# -----------------------------------------------------------------------------
+# Setup
+# -----------------------------------------------------------------------------
 set -o errexit
 set -o nounset
 set -o pipefail
+
+trap janitor EXIT
 
 # -----------------------------------------------------------------------------
 # Globals
@@ -10,7 +15,7 @@ set -o pipefail
 # Set user account and run values
 declare -r SCRIPT=${0##*/}
 declare -r AUTHOR="Urs Roesch"
-declare -r VERSION=0.5.1
+declare -r VERSION=0.6.0
 declare -r LICENSE=MIT
 declare -g USER_NAME=${USER_NAME:-packer}
 declare -g USER_UID=${USER_UID:-1010}
@@ -88,11 +93,19 @@ function run_command() {
   # Run in X11 redirection mode as $USER_NAME (default)
   if is_disabled "${RUN_AS_ROOT}"; then
     # Run in X11 redirection mode as user
-    exec gosu "${USER_NAME}" "${@}"
+    gosu "${USER_NAME}" "${@}"
     # Run in X11 redirection mode as root
   elif is_enabled "${RUN_AS_ROOT}"; then
-    exec "${@}"
+    "${@}"
   fi
+}
+
+function janitor() {
+  local exit_code=$?
+  pkill -TERM --parent ${$}
+  sleep 2
+  pkill -KILL --parent ${$}
+  exit ${exit_code}
 }
 
 # -----------------------------------------------------------------------------

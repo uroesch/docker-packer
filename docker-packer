@@ -14,7 +14,7 @@ trap cleanup EXIT
 # -----------------------------------------------------------------------------
 declare -r SCRIPT=${0##*/}
 declare -r AUTHOR="Urs Roesch"
-declare -r VERSION=0.7.0
+declare -r VERSION=0.7.1
 declare -r LICENSE=MIT
 declare -r DOCKER_IMAGE=uroesch/packer:latest
 declare -g BUILD_DIR=${BUILD_DIR:-$(pwd)}
@@ -138,7 +138,9 @@ function run_docker() {
 }
 
 function cleanup {
+  local exit_code=$?
   [[ -d ${TMP_DIR} ]] && rm -rf ${TMP_DIR}
+  exit ${exit_code}
 }
 
 # -----------------------------------------------------------------------------
