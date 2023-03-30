@@ -1,31 +1,37 @@
 FROM ubuntu:22.04
 MAINTAINER Urs Roesch <github@bun.ch>
 
-#VERSION 1.2.15
+#VERSION 1.2.16
 ENV container docker
-ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBIAN_FRONTEND noninteractive
 ENV CODENAME jammy
+ENV YAST2_SCHEMA_BASENAME yast2-schema-4.3.31-lp155.4.1.x86_64
+ENV YAST2_SCHEMA_URL https://download.opensuse.org/repositories/YaST:/SLE-15:/SP5/openSUSE_Leap_15.5/x86_64
+
 
 # install base tools for docker build
 RUN apt-get update \
     && apt-get install -y \
        ansible \
        bridge-utils \
+       cpio \
        curl \
        dnsmasq \
        file \
        genisoimage \
        git \
+       git-lfs \
        gosu \
        gpg \
        iproute2 \
+       jing \
        jq \
        lshw \
        p7zip-full \
        qemu-kvm \
        rake \
-       sshpass \
        software-properties-common \
+       sshpass \
        websockify \
        xorriso \
     && apt-get -y autoremove \
@@ -40,6 +46,12 @@ RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - \
     && apt-get -y autoremove \
     && apt-get -y autoclean \
     && find /var/cache/apt/archives -type f -delete
+
+# install xml files for yast2 autoinst.xml
+RUN curl --silent -JLO ${YAST2_SCHEMA_URL}/${YAST2_SCHEMA_BASENAME}.rpm \
+  && 7za x -so ${YAST2_SCHEMA_BASENAME}.rpm  | \
+    cpio --extract --make-directories --directory / \
+  && rm -f ${YAST2_SCHEMA_BASENAME}*
 
 # install novnc from git
 RUN cd /usr/local && \
