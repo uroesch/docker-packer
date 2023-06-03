@@ -1,11 +1,11 @@
 FROM ubuntu:22.04
 MAINTAINER Urs Roesch <github@bun.ch>
 
-#VERSION 1.2.16
+#VERSION 1.2.17
 ENV container docker
 ENV DEBIAN_FRONTEND noninteractive
 ENV CODENAME jammy
-ENV YAST2_SCHEMA_BASENAME yast2-schema-4.3.31-lp155.4.1.x86_64
+ENV YAST2_SCHEMA_BASENAME yast2-schema-4.3.31-lp155.454.1.x86_64
 ENV YAST2_SCHEMA_URL https://download.opensuse.org/repositories/YaST:/SLE-15:/SP5/openSUSE_Leap_15.5/x86_64
 
 
